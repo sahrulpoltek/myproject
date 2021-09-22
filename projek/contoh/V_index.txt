@@ -1,0 +1,283 @@
+<div id="page-wrapper" >
+    <div id="page-inner">
+
+        <h2>Data VM</h2>
+        <button data-toggle="modal" data-target="#mycreate" class="btn btn-success create"><i class="fa fa-plus"></i> Create VM</button>
+
+		<br><br>
+		<table class="table table-bordered">
+			<thead>
+				<tr>
+					<th style="text-align:center">No</th>
+					<th style="text-align:center">VMID</th>
+					<th style="text-align:center">Hostname</th>
+					<th style="text-align:center">Template</th>
+					<th style="text-align:center">IP</th>
+					<th style="text-align:center">Status</th>
+					<th style="text-align:center">Action</th>
+                </tr>
+			</thead>
+			<tbody>
+				<?php 
+				$machine = $this->crud->get('tb_vps', 'id','ASN');
+				if($machine->num_rows()>0){
+				$no=1;
+				foreach($machine->result() as $vm){
+					$status = '';
+					$status1 = '';
+					if($vm['status'] == 0){
+                        $status = '<span style="color:red">Stop</span>';
+                        $status1 = '<img src="'.base_url().'assets/images/stop.png" style="width:30px; height:30px" onclick="status_('.$vm["vps_id"].', 1)"/>';
+						$console = "<button class='btn btn-sm btn-primary disabled'><i class='fa fa-terminal' aria-hidden='true'></i></button>";
+						$disabled = '<a href='. base_url('vm/hapus/').$vm["id"] .' onclick="return confirm("Do you want to Delete ? ")" class="btn btn-sm btn-danger"><i class="fa fa-trash-o" aria-hidden="true"></i></a>';
+
+					}else if($vm['status'] == 1){
+                        $status = '<span style="color:green">Running</span>';
+						$status1 = '<img src="'.base_url().'assets/images/run.png" style="width:30px; height:30px" onclick="status_('.$vm['vps_id'].', 0)"/>';
+						$console = '<a href='. base_url('console/').$vm["vps_id"] .' class="btn btn-sm btn-primary"><i class="fa fa-terminal" aria-hidden="true"></i></a>';
+ 					}
+
+					foreach ($template as $tmp) {
+						if($tmp['id'] == $vm['template_id']) $tmp_name = $tmp['template_name'];
+						else $tmp_name = "";
+					}
+				?>
+				<tr>
+					<td style="text-align:center"><?php echo $no++?></td>
+					<td style="text-align:center"><?php echo $vm['vps_id']?></td>
+					<td style="text-align:center"><?php echo $vm['hostname']?></td>
+					<td style="text-align:center"><?php echo $tmp_name?></td>
+					<td style="text-align:center"><?php echo $vm['ip_address']?></td>
+					<td style="text-align:center"><?php echo $status?></td>
+					<td style="text-align:center">
+						<?php echo $status1?>
+						<?php echo $console?>
+						
+						<?php echo $disabled?>
+
+					</td>
+						<!-- modal untuk memicu modal ubah -->
+						<!-- <button data-toggle="modal" data-target="#update<?php echo $block['id_block'];?>" class="btn btn-success btn-sm" ><i class="glyphicon glyphicon-edit"></i></button> -->
+						
+						<!-- modal untuk memicu modal hapus -->
+						<!-- <a href="<?= base_url()?>ipblock/hapus/<?php echo $block['id_block'];?>" class="btn btn-danger btn-sm" onclick="return confirm('Do you want to Delete ? ')"><i class="glyphicon glyphicon-trash"></i></a> -->
+				</tr>
+
+				</tbody>
+		</table>
+				<div id="detailvps" class="modal" role="dialog">
+					<div class="modal-dialog">
+						<!-- modal konten -->
+						<div class="modal-content">
+							<div class="modal-header">
+								<button type="button" class="close" data-dismiss="modal" >&times</button>
+								<h4 class="modal-title">Detail VPS</h4>
+							</div>
+							<div class="modal-body">
+								<div class="row">
+									<div class="col-md-6">
+										<!-- <table> -->
+											<tr>
+												<td>VPS ID</td><td>:</td>
+												<td><?= $vm['vps_id']?></td>
+											</tr>
+											<tr>
+												<td>Hostname</td><td>:</td>
+												<td><?= $vm['hostname']?></td>
+											</tr>
+											<tr>
+												<td>Passowrd</td><td>:</td>
+												<td><?= $vm['password']?></td>
+											</tr>
+											<tr>
+												<td>OS</td><td>:</td>
+												<td><?= $tmp_name?></td>
+											</tr>
+											<tr>
+												<td>Ip Address</td><td>:</td>
+												<td><?= $vm['ip_address']?></td>
+											</tr>
+										<!-- </table> -->
+									</div>
+									<div class="col-md-6">
+										<table>
+											<tr>
+												<td>Memory</td><td>:</td>
+												<td><?= $vm['memory']?> GB</td>
+											</tr>
+											<tr>
+												<td>Disk</td><td>:</td>
+												<td><?= $vm['disk']?> GB</td>
+											</tr>
+											<tr>
+												<td>Status</td><td>:</td>
+												<td><?= $status?></td>
+											</tr>
+											<tr>
+												<td>Created</td><td>:</td>
+												<td><?= $vm['created']?></td>
+											</tr>
+										</table>
+									</div>
+								</div>
+								<hr>
+								<h5>Service</h5>
+								<form action="">
+									<div class="form-group">
+										<table>
+											<tr>
+												<td>Web Service</td><td>:</td>
+												<td>
+													<input type="radio" name="web" value="Apache"> Apache
+												</td>
+												<td>
+													<input type="radio" name="web" value="Nginx"> Nginx
+												</td>
+											</tr>
+											<tr>
+												<td>PHP</td><td>:</td>
+												<td>
+													<input type="radio" name="php" value="Apache"> PHP
+												</td>
+												<td>
+													<input type="radio" name="php" value="NO PHP"> No PHP
+												</td>
+											</tr>
+											<tr>
+												<td>Database</td><td>:</td>
+												<td>
+													<input type="radio" name="db" value="Apache"> Mysql
+												</td>
+												<td>
+													<input type="radio" name="db" value="NO PHP"> No DB
+												</td>
+											</tr>
+										</table>
+									</div>
+									<button class="btn btn-success" type="submit" id="submit">OK</button>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
+				<?php }}?>
+			
+		<!-- modal crate -->
+		<div id="mycreate" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <!-- modal konten -->
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal" >&times</button>
+						<h4 class="modal-title">Create VM</h4>
+					</div>
+					<div class="modal-body">
+                        <form method="POST" action="<?= base_url() ?>vm/simpan" enctype="multipart/form-data" name="form1">
+                            <input type="hidden" name="id" value="">
+							<div class="form-group">
+								<div class="row">
+									<div class="col-md-12">
+										<label for="exampleInputName">Template</label>
+											<select class="form-control" name="template" required type="text" aria-describedby="nameHelp" placeholder="hostname">
+												<option value="">--Pilih Template--</option>
+												<?php
+												foreach ($template as $tmp)  {
+													echo '<option value="'.$tmp['id'].'">'.$tmp['template_name'].'</option>';
+												}
+												?>
+											</select>
+									</div>
+
+									<div class="col-md-12">
+										<label for="exampleInputName">NIS/Username</label>
+										<input class="form-control" type="text" id="username" required aria-describedby="nameHelp" placeholder="NIS/Username" name="username">
+									</div>
+
+									<div class="col-md-12">
+										<label for="exampleInputName">Password</label>
+										<input class="form-control" type="password" id="pass" required aria-describedby="nameHelp" placeholder="Password" name="password">
+									</div>
+
+									<div class="col-md-12">
+										<label for="exampleInputName">VMID</label>
+										<input class="form-control" type="text" id="vmid" required aria-describedby="nameHelp" placeholder="vmid" name="vmid">
+									</div>
+
+									<div class="col-md-12">
+										<label for="exampleInputName">Hostname</label>
+										<input class="form-control" type="text" id="hostname" required aria-describedby="nameHelp" placeholder=".poliupg.ac.id" name="hostname">
+									</div>
+
+									<div class="col-md-8">
+										<label for="exampleInputName">IP</label>
+										<input required name="ip1" type="text" class="form-control" placeholder="192.168.1.100">
+									</div>
+									<div class="col-md-4">
+										<label for="exampleInputName">Prefix Length</label>
+										<input required  name="pl" type="text" class="form-control" id="pl" placeholder="ex: 24" type="number">
+									</div>
+
+									<div class="col-md-12">
+										<label for="exampleInputName">Gateway</label>
+										<input required name="gw" type="text" class="form-control" placeholder="192.168.1.1">
+									</div>
+								</div>
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-success" onclick="ValidateIPaddress(document.form1.ip1, document.form1.gw)" name="tambah">Create</button>
+								<button type="submit" style="display: none" id="submit">Create</button>
+								<button class="btn btn-default" data-dismiss="modal" name="close">Close</button>
+							</div>
+						</form>
+					</div>
+				</div>
+            </div>
+		</div>
+    </div>
+</div>
+
+<script type="text/javascript">
+	function status_(vps_id, status){
+        $.ajax({
+            url: "<?php echo base_url()?>vm/ubah_status",
+            type: "post",
+            data: {
+                vps_id: vps_id,
+                status: status
+            },
+            success: function (data) {
+				swal({
+					title: 'Update Status Berhasil',
+					type: 'success',
+					confirmButtonColor: '#3085d6',
+					confirmButtonText: 'OK',
+					confirmButtonClass: 'btn btn-success',
+					buttonsStyling: false
+                }).then((result) => {
+                    location.replace('<?php echo base_url()?>vm');
+                })
+            }
+        })
+	}
+
+	function ValidateIPaddress(inputText, gw){
+		var ipformat = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;  
+		if(inputText.value.match(ipformat) && gw.value.match(ipformat)){  
+			if($('#pl').val() < 1 || $('#pl').val() > 32){
+				alert("You have entered an invalid Prefix Length!");  
+				document.form1.ip1.focus();
+			}else{
+				var pass = $('#pass').val();
+				if(pass.length < 5){
+					alert("Password terlalu pendek!");  
+					document.form1.pass.focus();
+				}else{
+					$('#submit').click();  
+				}
+			}
+		}else{  
+			alert("You have entered an invalid IP address!");  
+			document.form1.ip1.focus();
+		}  
+	}
+</script>
